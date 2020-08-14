@@ -1,0 +1,16 @@
+.MuiInputBase-input.MuiOutlinedInput-input {
+    color: orange;
+}
+
+.MuiFormLabel-root.Mui-focused {
+    color: orange !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: orange !important;
+    border-width: 2px !important;
+} 
+
+.MuiFormLabel-root.MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-animated.MuiInputLabel-outlined {
+    color: orange !important;
+}
