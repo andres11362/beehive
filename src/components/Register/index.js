@@ -1,28 +1,49 @@
 import React, { Component, createRef } from 'react';
-import { Container, Typography, Button, FormControl, MenuItem } from '@material-ui/core';
+import { Container, Typography, Button, MenuItem, Snackbar } from '@material-ui/core';
 import { ValidatorForm, TextValidator, SelectValidator} from 'react-material-ui-form-validator';
 import './Register.scss';
+import axios from 'axios';
+import { registerUser } from '../api/endpoints';
+import { Redirect } from 'react-router-dom';
+import MuiAlert from '@material-ui/lab/Alert';
 
 class register extends Component { 
 
     constructor(props) {
         super(props);
         this.state = {
-            firstName: '',
-            lastName: '',
+            name: '',
             documentType: '',
             document: '',
             email: '',
+            password: '',
+            isAuth: props.isAuth,
+            open: false,
         }
         this.formRef = createRef();
         this.fetchRegister = this.fetchRegister.bind(this);
+        this.handleOpen = this.handleOpen.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
-    componentDidMount() {
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.isAuth !== this.props.isAuth) {
+            this.setState({isAuth: nextProps.isAuth});
+        }
     }
 
     fetchRegister() {
-        console.log(this.state);
+        const body = this.state
+        axios.post(registerUser, body)
+        .then(response => {
+            this.handleOpen();
+            this.props.getUser(response.data[0]);
+            setTimeout(() => { 
+                this.props.getValueAuth(true);
+            }, 5000)
+        }).catch(error => {
+            console.log(error);
+        })
     }
 
     handleEmail = (event) => {
@@ -30,14 +51,9 @@ class register extends Component {
         this.setState({ email });
     }
 
-    handleFirstName = (event) => {
-        const firstName = event.target.value;
-        this.setState({ firstName });
-    }
-
-    handleLastName = (event) => {
-        const lastName = event.target.value;
-        this.setState({ lastName });
+    handleName = (event) => {
+        const name = event.target.value;
+        this.setState({ name });
     }
 
     handleDocumentType = (event) => {
@@ -49,13 +65,36 @@ class register extends Component {
         const document = event.target.value;
         this.setState({ document });
     }
+
+    handlePassword = (event) => {
+        const password = event.target.value;
+        this.setState({ password });
+    }
+
+    handleOpen() {
+        this.setState({open: true})
+    };
+
+    handleClose() {
+        this.setState({open: false})
+    };
+
     
     render() {
-        const { email, firstName, lastName, document, documentType } = this.state;
+        const { email, name, document, documentType, password, isAuth, open } = this.state;
+
+        const Alert = (props) => {
+            return <MuiAlert elevation={6} variant="filled" {...props} />;
+        }
 
         return(
             <Container maxWidth="sm">
-                <Typography variant="h6" color="inherit" style={{ textAlign: 'left', color: '#F28705',  marginTop: '1em', marginBottom: '1em' }}>
+                <Snackbar open={open} autoHideDuration={6000} onClose={this.handleClose}>
+                    <Alert onClose={this.handleClose} severity="success">
+                        Usuario registrado correctamente
+                    </Alert>
+                </Snackbar>
+                <Typography variant="h6" color="inherit" style={{ textAlign: 'center', color: '#F28705',  marginTop: '1em', marginBottom: '1em' }}>
                     Registro
                 </Typography>
                 <ValidatorForm
@@ -65,23 +104,13 @@ class register extends Component {
                 >
                     <TextValidator
                         label="Nombre"
-                        onChange={this.handleFirstName}
+                        onChange={this.handleName}
                         name="nombre"
-                        value={firstName}
+                        value={name}
                         validators={['required']}
                         errorMessages={['Este campo es requerido']}
                         variant="outlined"
                         style= {{ marginBottom: '1em' }}
-                    />
-                    <TextValidator
-                        label="Apellido"
-                        onChange={this.handleLastName}
-                        name="apellido"
-                        value={lastName}
-                        validators={['required']}
-                        errorMessages={['Este campo es requerido']}
-                        style= {{ marginBottom: '1em' }}
-                        variant="outlined"
                     />
                     <SelectValidator 
                         label="Tipo de documento"
@@ -90,13 +119,13 @@ class register extends Component {
                         onChange={this.handleDocumentType}
                         validators={['required']}
                         errorMessages={['Este campo es requerido']}
-                        style= {{ marginBottom: '1em', minWidth: '13em' }}
+                        style= {{ marginBottom: '1em', minWidth: '14em' }}
                         variant="outlined"
                     >
                         <MenuItem aria-label="None" value="" />
-                        <MenuItem value={1}>C.C</MenuItem>
-                        <MenuItem value={2}>T.I</MenuItem>
-                        <MenuItem value={3}>C.E</MenuItem>
+                        <MenuItem value="CC">C.C</MenuItem>
+                        <MenuItem value="TI">T.I</MenuItem>
+                        <MenuItem value="CE">C.E</MenuItem>
                     </SelectValidator>
                     <TextValidator
                         label="Documento"
@@ -115,6 +144,17 @@ class register extends Component {
                         value={email}
                         validators={['required', 'isEmail']}
                         errorMessages={['Este campo es requerido', 'Correo no es valido']}
+                        style= {{ marginBottom: '1em' }}
+                        variant="outlined"
+                    />
+                    <TextValidator
+                        label="Contraseña"
+                        onChange={this.handlePassword}
+                        name="password"
+                        value={password}
+                        type="password"
+                        validators={['required']}
+                        errorMessages={['Este campo es requerido']}
                         style= {{ marginBottom: '1em' }}
                         variant="outlined"
                     />

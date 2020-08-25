@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+button.MuiButtonBase-root.MuiFab-root.fabBee {
+  top: auto;
+  position: fixed;
+  margin: 0;
+  right: 11em;
+  bottom: 2em;
+  left: auto;
+}

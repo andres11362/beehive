@@ -24,11 +24,8 @@ const header = () => {
     }));
 
     return(
-        <AppBar position="static" style={{ background: '#F29F05' }}>
+        <AppBar position="static" style={{ background: '#F29F05', alignItems: 'center' }}>
             <Toolbar>
-                <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-                <MenuIcon />
-                </IconButton>
                 <Typography variant="h6" className={classes.title} style={{ textAlign: 'center' }}>
                     BEEHIVE
                 </Typography>

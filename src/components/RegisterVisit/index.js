@@ -1,7 +1,11 @@
 import React, { Component, createRef } from 'react';
-import { Container, Typography, Button, FormControl, MenuItem } from '@material-ui/core';
+import { Container, Typography, Button, FormControl, MenuItem, Snackbar } from '@material-ui/core';
 import { ValidatorForm, TextValidator, SelectValidator} from 'react-material-ui-form-validator';
 import './Register.scss';
+import { registerAccess } from '../api/endpoints';
+import moment from 'moment';
+import axios from 'axios';
+import MuiAlert from '@material-ui/lab/Alert';
 
 class registerVisit extends Component { 
 
@@ -12,16 +16,42 @@ class registerVisit extends Component {
             hour: '',
             time: '',
             description: '',
+            user_id: props.user.id,
+            place_id: this.props.match.params.id,
+            open: false,
         }
         this.formRef = createRef();
         this.fetchRegister = this.fetchRegister.bind(this);
+        this.handleOpen = this.handleOpen.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
     componentDidMount() {
     }
 
     fetchRegister() {
-        console.log(this.state);
+
+        const date_start = moment(this.state.date+" "+this.state.hour).format('YYYY-MM-DD hh:mm:ss');
+        const date_end = moment(date_start).add(this.state.time, 'hours').format('YYYY-MM-DD hh:mm:ss');
+
+        const body = {
+            user_id: this.state.user_id,
+            place_id: this.state.place_id,
+            date_start,
+            date_end,
+            status: 'Pendiente',
+        }
+
+        axios.post(registerAccess, body)
+        .then(response => {
+            this.handleOpen();
+            setTimeout(() => { 
+                this.props.history.push('/');
+            }, 5000)
+        }).catch(error => {
+            console.log(error);
+        })
+
     }
 
     handleDate = (event) => {
@@ -44,13 +74,32 @@ class registerVisit extends Component {
         this.setState({ description });
     }
     
+    handleOpen() {
+        this.setState({open: true})
+    };
+
+    handleClose() {
+        this.setState({open: false})
+    };
+
+    
     render() {
-        const { date, hour, time, description } = this.state;
+        const { date, hour, time, description, open } = this.state;
+
+
+        const Alert = (props) => {
+            return <MuiAlert elevation={6} variant="filled" {...props} />;
+        }
 
         return(
             <Container maxWidth="sm">
-                <Typography variant="h6" color="inherit" style={{ textAlign: 'left', color: '#F28705',  marginTop: '1em', marginBottom: '1em' }}>
-                    Registro
+                <Snackbar open={open} autoHideDuration={6000} onClose={this.handleClose}>
+                    <Alert onClose={this.handleClose} severity="success">
+                        Visita registrada correctamente
+                    </Alert>
+                </Snackbar>
+                <Typography variant="h6" color="inherit" style={{ textAlign: 'center', color: '#F28705',  marginTop: '1em', marginBottom: '1em' }}>
+                    Registar visita
                 </Typography>
                 <ValidatorForm
                     ref={this.formRef}
